@@ -8,5 +8,10 @@ set windows-powershell := true
 @run day:
     cat ./data/day{{day}}.txt | cargo run --release --bin day{{day}}
 
+# Test solutions for a day
 @test day:
     cargo test --bin day{{day}}
+
+# Create new day's rust file and input file
+@new:
+    ./gen_d

@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+crate_name="aoc_2023"
+
+template="use $crate_name::input::Input;
+fn p1() {
+    todo!();
+}
+
+fn p2() {
+    todo!();
+}
+
+fn main() {
+    let input = Input::default().lines();
+}
+
+#[test]
+fn test_p1() {
+    todo!();
+}
+
+#[test]
+fn test_p2() {
+    todo!();
+}
+
+#[test]
+fn final_p1() {}
+
+#[test]
+fn final_p2() {}
+"
+
+day=$(date '+%-d')
+file="./src/bin/day$day.rs"
+if ! [[ -f "$file" ]]; then
+    echo creating rust file: $file
+    echo $template >$file
+fi
+data="./data/day$day.txt"
+if ! [[ -f "$data" ]]; then
+    echo creating input file: $data
+    # Download input
+    touch $data
+fi
