@@ -27,7 +27,7 @@ fn p1(input: &[String]) -> u32 {
 fn p2(input: &[String]) -> u32 {
     let mut sum = 0;
     for line in input {
-        let mut v: Vec<u8> = p2_line_to_vec(line);
+        let v: Vec<u8> = p2_line_to_vec(line);
         let mut n = 0u32;
         if let Some(d) = v.first() {
             n = (*d as u32) * 10;
