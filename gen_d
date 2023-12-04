@@ -1,44 +1,45 @@
 #!/usr/bin/env bash
 
 crate_name="aoc_2023"
-
-template="use $crate_name::input::Input;
-fn p1() {
-    todo!();
-}
-
-fn p2() {
-    todo!();
-}
-
-fn main() {
-    let input = Input::default().lines();
-}
-
-#[test]
-fn test_p1() {
-    todo!();
-}
-
-#[test]
-fn test_p2() {
-    todo!();
-}
-
-#[test]
-fn final_p1() {}
-
-#[test]
-fn final_p2() {}
-"
-
 day=$(date '+%-d')
 file="./src/bin/day$day.rs"
+data="./data/day$day.txt"
+
+template="
+use $crate_name::input::Input;\n
+fn p1() {\n
+    todo!();\n
+}\n
+\n
+fn p2() {\n
+    todo!();\n
+}\n
+\n
+fn main() {\n
+    let input = Input::default().lines();\n
+}\n
+\n
+#[test]\n
+fn test_p1() {\n
+    todo!();\n
+}\n
+\n
+#[test]\n
+fn test_p2() {\n
+    todo!();\n
+}\n
+\n
+#[test]\n
+fn final_test() {\n
+    let input = Input::file(\"$data\").unwrap().lines();\n
+}\n
+"
+
 if ! [[ -f "$file" ]]; then
     echo creating rust file: $file
-    echo $template >$file
+    echo -e $template >$file
 fi
-data="./data/day$day.txt"
+
 if ! [[ -f "$data" ]]; then
     echo creating input file: $data
     # Download input
