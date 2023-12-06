@@ -7,16 +7,19 @@ data="./data/day$day.txt"
 
 template="
 use $crate_name::input::Input;\n
-fn p1() {\n
+\n
+fn p1() -> u32 {\n
     todo!();\n
 }\n
 \n
-fn p2() {\n
+fn p2() -> u32 {\n
     todo!();\n
 }\n
 \n
 fn main() {\n
     let input = Input::default().lines();\n
+    println!(\"P1: {}\", p1());\n
+    println!(\"P2: {}\", p2());\n
 }\n
 \n
 #[test]\n
