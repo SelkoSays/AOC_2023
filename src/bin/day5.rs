@@ -321,5 +321,10 @@ fn test_remap_range() {
 
 #[test]
 fn final_test() {
-    let input = Input::file("./data/day5.txt").unwrap().lines();
+    let (h, v): (Seeds, Vec<AtoBMap>) = Input::file("./data/day5.txt")
+        .unwrap()
+        .read_headers_n_spaced_data()
+        .unwrap();
+    assert_eq!(227653707, p1(&h, &v));
+    assert_eq!(78775051, p2(h, &v));
 }

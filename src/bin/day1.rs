@@ -73,8 +73,8 @@ fn p2_line_to_vec(line: &str) -> Vec<u8> {
 
 fn main() {
     let input = Input::default().lines();
-    println!("{}", p1(&input));
-    println!("{}", p2(&input));
+    println!("P1: {}", p1(&input));
+    println!("P2: {}", p2(&input));
 }
 
 #[test]
@@ -113,4 +113,11 @@ zoneight234
 
     let out = p2(&v);
     assert_eq!(out, 281);
+}
+
+#[test]
+fn final_test() {
+    let input = Input::file("./data/day1.txt").unwrap().lines();
+    assert_eq!(55208, p1(&input));
+    assert_eq!(54578, p2(&input));
 }

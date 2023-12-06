@@ -154,11 +154,9 @@ Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green
 }
 
 #[test]
-fn final_p1() {
+fn final_test() {
     let input = Input::file("./data/day2.txt").unwrap();
     let data: Vec<Game> = input.read_data().unwrap();
     assert_eq!(p1(&data), 2913);
+    assert_eq!(p2(&data), 55593);
 }
-
-#[test]
-fn final_p2() {}
