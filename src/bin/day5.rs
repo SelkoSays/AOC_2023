@@ -44,15 +44,15 @@ struct SeedsR(Vec<R>);
 
 #[derive(Debug, Default)]
 struct AtoBMap {
-    a: String,
-    b: String,
+    _a: String,
+    _b: String,
     dst: Vec<R>,
     src: Vec<R>,
 }
 
 impl AtoBMap {
     pub fn new(a: String, b: String, dst: Vec<R>, src: Vec<R>) -> Self {
-        Self { a, b, dst, src }
+        Self { _a: a, _b: b, dst, src }
     }
 
     pub fn remap(&self, seed: usize) -> usize {
@@ -226,8 +226,8 @@ humidity-to-location map:
     ];
     assert_eq!(input.1.len(), 7);
     for (i, ab) in exp_atob.iter().enumerate() {
-        assert_eq!(ab.a, input.1[i].a);
-        assert_eq!(ab.b, input.1[i].b);
+        assert_eq!(ab._a, input.1[i]._a);
+        assert_eq!(ab._b, input.1[i]._b);
         assert_eq!(ab.dst, input.1[i].dst);
         assert_eq!(ab.src, input.1[i].src);
     }
