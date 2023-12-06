@@ -51,8 +51,8 @@ struct AtoBMap {
 }
 
 impl AtoBMap {
-    pub fn new(a: String, b: String, dst: Vec<R>, src: Vec<R>) -> Self {
-        Self { _a: a, _b: b, dst, src }
+    pub fn new(_a: String, _b: String, dst: Vec<R>, src: Vec<R>) -> Self {
+        Self { _a, _b, dst, src }
     }
 
     pub fn remap(&self, seed: usize) -> usize {
