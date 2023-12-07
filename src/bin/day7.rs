@@ -140,9 +140,7 @@ fn main() {
     let input = Input::default().lines();
     let data = hand_transforminator(&input, &hm);
     println!("P1: {}", p1(data));
-    if let Some(v) = hm.get_mut(&'J') {
-        *v = 1
-    }
+    *hm.get_mut(&'J').unwrap() = 1;
     let data = hand_transforminator(&input, &hm);
     println!("P2: {}", p2(data));
 }
@@ -303,9 +301,7 @@ fn final_test() {
     let input = Input::file("./data/day7.txt").unwrap().lines();
     let data = hand_transforminator(&input, &hm);
     assert_eq!(247823654, p1(data));
-    if let Some(v) = hm.get_mut(&'J') {
-        *v = 1
-    }
+    *hm.get_mut(&'J').unwrap() = 1;
     let data = hand_transforminator(&input, &hm);
     assert_eq!(245461700, p2(data));
 }
