@@ -278,7 +278,7 @@ QQQJA 483
     ];
     exp.sort();
     assert_eq!(exp_s, exp);
-    //assert_eq!(p2(h), 6440);
+    assert_eq!(p2(h), 5905);
 }
 
 #[test]
