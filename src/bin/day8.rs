@@ -25,25 +25,36 @@ fn p2(ins: &Instrctions, map: &Map) -> usize {
         .cloned()
         .collect();
     let mut hm: HashMap<String, String> = HashMap::new();
-    while !pos.iter().all(|p| p.ends_with('Z')) {
+    // while !pos.iter().all(|p| p.ends_with('Z')) {
+    //     for po in pos.iter_mut() {
+    //         if let Some(p) = hm.get(po) {
+    //             *po = p.clone();
+    //             //println!("Hit: {po}");
+    //             continue;
+    //         } else {
+    //             //println!("Not hit: {po}");
+    //             let mut cpo = po.clone();
+    //             for i in &ins.0 {
+    //                 if let Some(p) = map.map.get(&cpo) {
+    //                     cpo = p[*i as usize].clone();
+    //                 }
+    //             }
+    //             hm.insert(po.clone(), cpo.clone());
+    //             *po = cpo;
+    //         }
+    //     }
+    //     it += ins.0.len();
+    // }
+    for i in ins.0.iter().cycle() {
+        if pos.iter().all(|p| p.ends_with('Z')) {
+            break;
+        }
         for po in pos.iter_mut() {
-            if let Some(p) = hm.get(po) {
-                *po = p.clone();
-                //println!("Hit: {po}");
-                continue;
-            } else {
-                //println!("Not hit: {po}");
-                let mut cpo = po.clone();
-                for i in &ins.0 {
-                    if let Some(p) = map.map.get(&cpo) {
-                        cpo = p[*i as usize].clone();
-                    }
-                }
-                hm.insert(po.clone(), cpo.clone());
-                *po = cpo;
+            if let Some(p) = map.map.get(po) {
+                *po = p[*i as usize].clone();
             }
         }
-        it += ins.0.len();
+        it += 1;
     }
     it
 }
