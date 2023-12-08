@@ -29,8 +29,10 @@ fn p2(ins: &Instrctions, map: &Map) -> usize {
         for po in pos.iter_mut() {
             if let Some(p) = hm.get(po) {
                 *po = p.clone();
-                break;
+                //println!("Hit: {po}");
+                continue;
             } else {
+                //println!("Not hit: {po}");
                 let mut cpo = po.clone();
                 for i in &ins.0 {
                     if let Some(p) = map.map.get(&cpo) {
