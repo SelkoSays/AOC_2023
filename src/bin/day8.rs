@@ -26,12 +26,9 @@ fn p2(ins: &Instrctions, map: &Map) -> usize {
     let cy: Vec<usize> = pos
         .iter()
         .map(|s| map.calc_cycle(s, ins))
-        .map(|(x, _)| x)
+        .map(|(x, _)| x) // x in _ sta enaka
         .collect();
     cy.iter().fold(1, |acc, v| lcm(acc, *v))
-    // for k in &pos {
-    //     println!("key: {k}, {:?}", map.calc_cycle(k, ins));
-    // }
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
