@@ -124,5 +124,7 @@ fn test_p2() {
 
 #[test]
 fn final_test() {
-    let input = Input::file("./data/day9.txt").unwrap().lines();
+    let input = Input::file("./data/day9.txt").unwrap().read_data().unwrap();
+    assert_eq!(1834108701, p1(&input));
+    assert_eq!(993, p2(&input));
 }
