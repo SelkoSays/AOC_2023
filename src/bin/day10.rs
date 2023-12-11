@@ -180,16 +180,6 @@ impl<T> Matrix<T> {
     }
 }
 
-impl<'a, T> Matrix<T> {
-    pub fn iter(&'a self) -> MatIter<'a, T> {
-        MatIter {
-            i: 0,
-            j: 0,
-            m: self,
-        }
-    }
-}
-
 impl<T: PartialEq> Matrix<T> {
     pub fn find(&self, el: &T) -> Option<(usize, usize)> {
         for (y, v) in self.0.iter().enumerate() {
@@ -198,36 +188,6 @@ impl<T: PartialEq> Matrix<T> {
                     return Some((x, y));
                 }
             }
-        }
-        None
-    }
-}
-
-#[derive(Debug)]
-struct MatIter<'a, T> {
-    i: usize,
-    j: usize,
-    m: &'a Matrix<T>,
-}
-
-impl<'a, T> Iterator for MatIter<'a, T> {
-    type Item = &'a T;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.m.0.len() <= self.j {
-            return None;
-        }
-        if let Some(v) = self.m.0.get(self.j) {
-            if let Some(t) = v.get(self.i) {
-                if (self.i + 1) >= v.len() {
-                    self.i = 0;
-                    self.j += 1;
-                } else {
-                    self.i += 1;
-                }
-                return Some(t);
-            }
-            return None;
         }
         None
     }

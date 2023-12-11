@@ -113,24 +113,6 @@ impl Matrix<Tile> {
     }
 }
 
-impl<T: std::fmt::Display> std::fmt::Display for Matrix<T> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for v in &self.0 {
-            for t in v {
-                match write!(f, "{t}") {
-                    Ok(_) => {}
-                    err => return err,
-                }
-            }
-            match writeln!(f) {
-                Ok(_) => {}
-                err => return err,
-            }
-        }
-        Ok(())
-    }
-}
-
 fn main() {
     let input = Input::default().lines();
     println!("P1: {}", p1(&input));
