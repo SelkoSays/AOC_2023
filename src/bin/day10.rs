@@ -36,36 +36,66 @@ fn p1(m: &Matrix<Tile>) -> usize {
 fn p2(m: &Matrix<Tile>) -> usize {
     let mut m2 = mark_points(m);
     let mut area = 0usize;
-    for (_y, v) in m2.0.iter_mut().enumerate() {
+    println!("{m2}");
+    for v in m2.0.iter_mut() {
         let mut in_area = false;
-        let mut ew_conut = 0;
-        for (_x, e) in v.iter_mut().enumerate() {
-            if e == &1 {
-                if (ew_conut & 1) == 1 {
-                    in_area = true;
-                }
-                in_area = !in_area;
-                ew_conut = 0;
-            } else if e == &2 {
-                ew_conut += 1;
-            } else if in_area {
-                area += 1;
-                *e = 1;
+        for e in v.iter_mut() {
+            match e {
+                Mark::Empty => *e = if in_area { Mark::Inner } else { Mark::Outer },
+                //Mark::Start => todo!(),
+                Mark::Pipe(Dir::North, Dir::South) => in_area = !in_area,
+                Mark::Pipe(_, Dir::East) => in_area = true,
+                Mark::Pipe(Dir::North | Dir::South, Dir::West) => in_area = !in_area,
+                Mark::Pipe(_, _) => {}
+                _ => unreachable!(),
             }
+            // if e == &1 {
+            //     in_area = !in_area;
+            // } else if e == &2 {
+            // } else if in_area {
+            //     area += 1;
+            //     *e = 3;
+            // }
         }
     }
     println!("{m2}");
     area
 }
 
-fn mark_points(m: &Matrix<Tile>) -> Matrix<i8> {
+#[derive(Debug, Clone, Copy)]
+enum Mark {
+    Empty,
+    Inner,
+    Outer,
+    Pipe(Dir, Dir),
+}
+
+impl std::fmt::Display for Mark {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Pipe(Dir::North, Dir::South) => write!(f, "│"),
+            Self::Pipe(Dir::East, Dir::West) => write!(f, "─"),
+            Self::Pipe(Dir::North, Dir::East) => write!(f, "└"),
+            Self::Pipe(Dir::North, Dir::West) => write!(f, "┘"),
+            Self::Pipe(Dir::South, Dir::West) => write!(f, "┐"),
+            Self::Pipe(Dir::South, Dir::East) => write!(f, "┌"),
+            //Self::Start => write!(f, "S"),
+            Self::Empty => write!(f, "."),
+            Self::Inner => write!(f, "I"),
+            Self::Outer => write!(f, "O"),
+            _ => panic!("Wrong pipe {self:?}"),
+        }
+    }
+}
+
+fn mark_points(m: &Matrix<Tile>) -> Matrix<Mark> {
     let (mut x, mut y) = m.find(&Tile::Start).unwrap();
     let mut t = m.get(x, y).unwrap();
     assert_eq!(t, &Tile::Start);
     let mut prev = 5usize;
     let d = [Dir::North, Dir::West, Dir::South, Dir::East];
     let c: [(isize, isize); 4] = [(0, -1), (-1, 0), (0, 1), (1, 0)];
-    let mut v = vec![vec![0; m.0[0].len()]; m.0.len()];
+    let mut v = vec![vec![Mark::Empty; m.0[0].len()]; m.0.len()];
     loop {
         for (i, ot) in m.get_adj(x, y).into_iter().enumerate() {
             if i == prev {
@@ -73,9 +103,18 @@ fn mark_points(m: &Matrix<Tile>) -> Matrix<i8> {
             }
             if let Some(nt) = ot {
                 if t.compatible(nt, d[i]) {
-                    v[y][x] = 1;
-                    if matches!(t, Tile::Pipe(Dir::East, Dir::West)) {
-                        v[y][x] = 2;
+                    match t {
+                        Tile::Start => {
+                            let a: Vec<bool> = m
+                                .get_adj(x, y)
+                                .iter()
+                                .enumerate()
+                                .map(|(k, c)| c.is_some() && t.compatible(c.unwrap(), d[k]))
+                                .collect();
+                            v[y][x] = start_pipe(&a);
+                        }
+                        Tile::Pipe(a, b) => v[y][x] = Mark::Pipe(*a, *b),
+                        _ => {}
                     }
                     t = nt;
                     x = (c[i].0 + x as isize) as usize;
@@ -90,6 +129,28 @@ fn mark_points(m: &Matrix<Tile>) -> Matrix<i8> {
         }
     }
     Matrix(v)
+}
+
+fn start_pipe(a: &[bool]) -> Mark {
+    let mut b = [Dir::North, Dir::South];
+    let mut k = 0;
+    if a[0] {
+        b[k] = Dir::North;
+        k += 1;
+    }
+    if a[2] {
+        b[k] = Dir::South;
+        k += 1;
+    }
+    if a[3] {
+        b[k] = Dir::East;
+        k += 1;
+    }
+    if a[1] {
+        b[k] = Dir::West;
+        k += 1;
+    }
+    Mark::Pipe(b[0], b[1])
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -160,6 +221,48 @@ impl Tile {
     }
 }
 
+impl Tile {
+    pub fn from_slice(v: &[String]) -> Matrix<Tile> {
+        Matrix(
+            v.iter()
+                .map(|l| l.chars().map(Self::from).collect())
+                .collect(),
+        )
+    }
+}
+
+impl std::fmt::Display for Tile {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Pipe(Dir::North, Dir::South) => write!(f, "│"),
+            Self::Pipe(Dir::East, Dir::West) => write!(f, "─"),
+            Self::Pipe(Dir::North, Dir::East) => write!(f, "└"),
+            Self::Pipe(Dir::North, Dir::West) => write!(f, "┘"),
+            Self::Pipe(Dir::South, Dir::West) => write!(f, "┐"),
+            Self::Pipe(Dir::South, Dir::East) => write!(f, "┌"),
+            Tile::Ground => write!(f, "."),
+            Tile::Start => write!(f, "S"),
+            _ => panic!("Pipes are wrong"),
+        }
+    }
+}
+
+impl From<char> for Tile {
+    fn from(value: char) -> Self {
+        match value {
+            'S' => Self::Start,
+            '.' => Self::Ground,
+            'L' => Self::Pipe(Dir::North, Dir::East),
+            'J' => Self::Pipe(Dir::North, Dir::West),
+            'F' => Self::Pipe(Dir::South, Dir::East),
+            '7' => Self::Pipe(Dir::South, Dir::West),
+            '|' => Self::Pipe(Dir::North, Dir::South),
+            '-' => Self::Pipe(Dir::East, Dir::West),
+            _ => panic!("Unknown conversion from {value} to tile"),
+        }
+    }
+}
+
 #[derive(Debug)]
 struct Matrix<T>(Vec<Vec<T>>);
 
@@ -211,48 +314,6 @@ impl<T: std::fmt::Display> std::fmt::Display for Matrix<T> {
     }
 }
 
-impl Tile {
-    pub fn from_slice(v: &[String]) -> Matrix<Tile> {
-        Matrix(
-            v.iter()
-                .map(|l| l.chars().map(Self::from).collect())
-                .collect(),
-        )
-    }
-}
-
-impl std::fmt::Display for Tile {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::Pipe(Dir::North, Dir::South) => write!(f, "│"),
-            Self::Pipe(Dir::East, Dir::West) => write!(f, "─"),
-            Self::Pipe(Dir::North, Dir::East) => write!(f, "└"),
-            Self::Pipe(Dir::North, Dir::West) => write!(f, "┘"),
-            Self::Pipe(Dir::South, Dir::West) => write!(f, "┐"),
-            Self::Pipe(Dir::South, Dir::East) => write!(f, "┌"),
-            Tile::Ground => write!(f, "."),
-            Tile::Start => write!(f, "S"),
-            _ => panic!("Pipes are wrong"),
-        }
-    }
-}
-
-impl From<char> for Tile {
-    fn from(value: char) -> Self {
-        match value {
-            'S' => Self::Start,
-            '.' => Self::Ground,
-            'L' => Self::Pipe(Dir::North, Dir::East),
-            'J' => Self::Pipe(Dir::North, Dir::West),
-            'F' => Self::Pipe(Dir::South, Dir::East),
-            '7' => Self::Pipe(Dir::South, Dir::West),
-            '|' => Self::Pipe(Dir::North, Dir::South),
-            '-' => Self::Pipe(Dir::East, Dir::West),
-            _ => panic!("Unknown conversion from {value} to tile"),
-        }
-    }
-}
-
 fn main() {
     let input = Tile::from_slice(&Input::default().lines());
     println!("P1: {}", p1(&input));
@@ -296,7 +357,7 @@ fn test_p2() {
     let m = Tile::from_slice(&input);
     println!("{m}");
     println!("{}", p2(&m));
-    /*let input = Input::inline(
+    let input = Input::inline(
             "\
     .F----7F7F7F7F-7....
     .|F--7||||||||FJ....
@@ -313,7 +374,7 @@ fn test_p2() {
         .lines();
         let m = Tile::from_slice(&input);
         println!("{m}");
-        println!("{}", p2(&m));*/
+        println!("{}", p2(&m));
 }
 
 #[test]
