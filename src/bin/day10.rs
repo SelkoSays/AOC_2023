@@ -35,31 +35,36 @@ fn p1(m: &Matrix<Tile>) -> usize {
 
 fn p2(m: &Matrix<Tile>) -> usize {
     let mut m2 = mark_points(m);
-    let mut area = 0usize;
-    println!("{m2}");
-    for v in m2.0.iter_mut() {
+    //println!("{m2}");
+    let ml = m2.size();
+    for y in 0..ml.0.max(ml.1) * 2 {
+        let mut y1 = y;
         let mut in_area = false;
-        for e in v.iter_mut() {
-            match e {
-                Mark::Empty => *e = if in_area { Mark::Inner } else { Mark::Outer },
-                //Mark::Start => todo!(),
-                Mark::Pipe(Dir::North, Dir::South) => in_area = !in_area,
-                Mark::Pipe(_, Dir::East) => in_area = true,
-                Mark::Pipe(Dir::North | Dir::South, Dir::West) => in_area = !in_area,
-                Mark::Pipe(_, _) => {}
-                _ => unreachable!(),
+        for x in 0..y {
+            if let Some(e) = m2.get_mut(x, y1) {
+                match e {
+                    Mark::Empty => *e = if in_area { Mark::Inner } else { Mark::Outer },
+                    //Mark::Start => todo!(),
+                    Mark::Pipe(Dir::North, Dir::South) => in_area = !in_area,
+                    Mark::Pipe(Dir::East, Dir::West) => in_area = !in_area,
+                    Mark::Pipe(Dir::North, Dir::East) => in_area = !in_area,
+                    Mark::Pipe(Dir::South, Dir::West) => in_area = !in_area,
+                    Mark::Pipe(_, _) => {}
+                    _ => unreachable!(),
+                }
             }
-            // if e == &1 {
-            //     in_area = !in_area;
-            // } else if e == &2 {
-            // } else if in_area {
-            //     area += 1;
-            //     *e = 3;
-            // }
+            y1 -= 1;
+        }
+        if let Some(e) = m2.get_mut(y, y1) {
+            if let Mark::Empty = e {
+                *e = Mark::Outer
+            }
         }
     }
-    println!("{m2}");
-    area
+    //println!("{m2}");
+    m2.0.iter()
+        .map(|v| v.iter().filter(|mark| matches!(mark, Mark::Inner)).count())
+        .sum()
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -148,7 +153,6 @@ fn start_pipe(a: &[bool]) -> Mark {
     }
     if a[1] {
         b[k] = Dir::West;
-        k += 1;
     }
     Mark::Pipe(b[0], b[1])
 }
@@ -271,6 +275,19 @@ impl<T> Matrix<T> {
         self.0.get(y).map(|v| v.get(x)).unwrap_or(None)
     }
 
+    pub fn get_mut(&mut self, x: usize, y: usize) -> Option<&mut T> {
+        if let Some(vt) = self.0.get_mut(y) {
+            vt.get_mut(x)
+        } else {
+            None
+        }
+    }
+
+    /// returns (len_x, len_y)
+    pub fn size(&self) -> (usize, usize) {
+        (self.0[0].len(), self.0.len())
+    }
+
     /// returns optional adjacent elemnts in order: Up, Left, Down, Right
     /// [^, <, v, >]
     pub fn get_adj(&self, x: usize, y: usize) -> [Option<&T>; 4] {
@@ -356,9 +373,9 @@ fn test_p2() {
     .lines();
     let m = Tile::from_slice(&input);
     println!("{m}");
-    println!("{}", p2(&m));
+    assert_eq!(4, p2(&m));
     let input = Input::inline(
-            "\
+        "\
     .F----7F7F7F7F-7....
     .|F--7||||||||FJ....
     .||.FJ||||||||L7....
@@ -370,14 +387,16 @@ fn test_p2() {
     ....FJL-7.||.||||...
     ....L---J.LJ.LJLJ...
         ",
-        )
-        .lines();
-        let m = Tile::from_slice(&input);
-        println!("{m}");
-        println!("{}", p2(&m));
+    )
+    .lines();
+    let m = Tile::from_slice(&input);
+    println!("{m}");
+    assert_eq!(8, p2(&m));
 }
 
 #[test]
 fn final_test() {
-    let input = Input::file("./data/day10.txt").unwrap().lines();
+    let input = Tile::from_slice(&Input::file("./data/day10.txt").unwrap().lines());
+    println!("P1: {}", p1(&input));
+    println!("P2: {}", p2(&input));
 }
