@@ -3,131 +3,74 @@ use std::str::FromStr;
 use aoc_2023::input::Input;
 
 fn p1(inp: &[Map]) -> usize {
-    let mut rc = 0;
-    let mut cc = 0;
-    for (r, c) in inp.iter().map(|m| (&m.rows, &m.cols)) {
-        let it = c.windows(2).enumerate().filter_map(
-            |(i, w)| {
-                if w[0] == w[1] {
-                    Some(i + 1)
-                } else {
-                    None
-                }
-            },
-        );
-        'outer: for i in it {
-            for j in 1..=i {
-                if let Some(n) = c.get(i + j - 1) {
-                    if c[i - j] != *n {
-                        continue 'outer;
-                    }
-                } else {
-                    break;
-                }
-            }
-            cc += i;
-        }
-        let it = r.windows(2).enumerate().filter_map(
-            |(i, w)| {
-                if w[0] == w[1] {
-                    Some(i + 1)
-                } else {
-                    None
-                }
-            },
-        );
-
-        'outer: for i in it {
-            for j in 1..=i {
-                if let Some(n) = r.get(i + j - 1) {
-                    if r[i - j] != *n {
-                        continue 'outer;
-                    }
-                } else {
-                    break;
-                }
-            }
-            rc += i;
-        }
-    }
+    let (r, c): (Vec<_>, Vec<_>) = inp.iter().map(|m| (&m.rows, &m.cols)).unzip();
+    let rc: usize = mirrors(&r).iter().sum();
+    let cc: usize = mirrors(&c).iter().sum();
     cc + 100 * rc
 }
 
 fn p2(inp: &[Map]) -> usize {
-    let mut rc = 0;
-    let mut cc = 0;
-    for (r, c) in inp.iter().map(|m| (&m.rows, &m.cols)) {
-        let it = c.windows(2).enumerate().filter_map(|(i, w)| {
-            if (w[0] & !w[1]).count_ones() <= 1 {
-                Some(i + 1)
-            } else {
-                None
-            }
-        });
-        let mut f = false;
-        'outer: for i in it {
-            f = false;
-            for j in 1..=i {
-                if let Some(n) = c.get(i + j - 1) {
-                    match (c[i - j] & (!*n)).count_ones() {
-                        1 => {
-                            if f {
-                                continue 'outer;
-                            } else {
-                                f = true;
-                            }
-                        }
-                        2.. => {
-                            continue 'outer;
-                        }
-                        _ => {}
-                    }
-                } else {
-                    break;
-                }
-            }
-            cc += i;
-        }
-        let it = r.windows(2).enumerate().filter_map(|(i, w)| {
-            if (w[0] & !w[1]).count_ones() <= 1 {
-                Some(i + 1)
-            } else {
-                None
-            }
-        });
+    let (r, c): (Vec<_>, Vec<_>) = inp.iter().map(|m| (&m.rows, &m.cols)).unzip();
+    let rc: usize = mirrors2(&r).iter().sum();
+    let cc: usize = mirrors2(&c).iter().sum();
+    cc + 100 * rc
+}
 
-        'outer: for i in it {
-            f = false;
+fn mirrors(v: &[&Vec<u32>]) -> Vec<usize> {
+    let mut vi = Vec::new();
+    for vv in v {
+        'outer: for i in 0..vv.len() {
             for j in 1..=i {
-                if let Some(n) = r.get(i + j - 1) {
-                    match (r[i - j] & (!*n)).count_ones() {
-                        1 => {
-                            if f {
-                                continue 'outer;
-                            } else {
-                                f = true;
-                            }
-                        }
-                        2.. => {
-                            continue 'outer;
-                        }
-                        _ => {}
+                if let Some(n) = vv.get(i + j - 1) {
+                    if vv[i - j] != *n {
+                        continue 'outer;
                     }
                 } else {
                     break;
                 }
             }
-            rc += i;
+            vi.push(i);
         }
     }
-    cc + 100 * rc
+    vi
+}
+
+fn mirrors2(v: &[&Vec<u32>]) -> Vec<usize> {
+    let mut vi = Vec::new();
+    for vv in v {
+        //let vv = v[0];
+        'outer: for i in 0..vv.len() {
+            let mut f = false;
+            for j in 1..=i {
+                if let Some(n) = vv.get(i + j - 1) {
+                    match (vv[i - j] ^ *n).count_ones().cmp(&1) {
+                        std::cmp::Ordering::Equal => {
+                            if f {
+                                continue 'outer;
+                            } else {
+                                f = true;
+                            }
+                        }
+                        std::cmp::Ordering::Greater => continue 'outer,
+                        _ => {}
+                    }
+                } else {
+                    break;
+                }
+            }
+            if f {
+                vi.push(i);
+            }
+        }
+    }
+    vi
 }
 
 struct Map {
     rows: Vec<u32>,
     cols: Vec<u32>,
-    lenx: usize,
-    leny: usize,
+    _lenx: usize,
+    _leny: usize,
 }
 
 impl FromStr for Map {
@@ -161,8 +104,8 @@ impl FromStr for Map {
         Ok(Self {
             rows,
             cols,
-            lenx,
-            leny,
+            _lenx: lenx,
+            _leny: leny,
         })
     }
 }
@@ -195,8 +138,8 @@ fn test_p1() {
     )
     .read_spaced_data()
     .unwrap();
-    assert_eq!(9, input[0].lenx);
-    assert_eq!(7, input[0].leny);
+    assert_eq!(9, input[0]._lenx);
+    assert_eq!(7, input[0]._leny);
     let exp_rows = vec![
         0b101100110u32,
         0b001011010,
@@ -253,4 +196,6 @@ fn final_test() {
         .unwrap()
         .read_spaced_data()
         .unwrap();
+    assert_eq!(37975, p1(&input));
+    assert_eq!(32497, p2(&input));
 }
