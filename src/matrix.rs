@@ -1,9 +1,25 @@
-#[derive(Debug)]
-pub struct Matrix<T>(Vec<Vec<T>>);
+#[derive(Debug, Clone)]
+pub struct Matrix<T>(pub Vec<Vec<T>>);
 
 impl<T> Matrix<T> {
     pub fn get(&self, x: usize, y: usize) -> Option<&T> {
         self.0.get(y).map(|v| v.get(x)).unwrap_or(None)
+    }
+
+    pub fn get_mut(&mut self, x: usize, y: usize) -> Option<&mut T> {
+        self.0.get_mut(y).map(|v| v.get_mut(x)).unwrap_or(None)
+    }
+
+    pub fn lenx(&self) -> usize {
+        if let Some(v) = self.0.get(0) {
+            v.len()
+        } else {
+            0
+        }
+    }
+
+    pub fn leny(&self) -> usize {
+        self.0.len()
     }
 }
 
