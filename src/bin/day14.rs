@@ -385,6 +385,7 @@ OO....OO..
 fn final_test() {
     let input: Data = Input::file("./data/day14.txt").unwrap().read().unwrap();
     assert_eq!(p1(&input), 110090);
+    assert_eq!(p2(&input), 95254);
 }
 
 #[test]
