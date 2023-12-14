@@ -247,7 +247,7 @@ fn main() {
 
 #[test]
 fn test_p1() {
-    let mut input: Data = Input::inline(
+    let input: Data = Input::inline(
         "\
 O....#....
 O.OO#....#
