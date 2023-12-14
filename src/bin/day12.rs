@@ -33,6 +33,19 @@ impl SpringRow {
         }
     }
 
+    pub fn validate_until(&self, end: usize) -> bool {
+        let v: Vec<_> = self.springs[0..end]
+            .split(|c| c == &b'.')
+            .filter(|s| !s.is_empty())
+            .map(|s| s.len() as u8)
+            .collect();
+        if v.len() <= self.fails.len() {
+            v.iter().enumerate().all(|(i, l)| self.fails[i] == *l)
+        } else {
+            false
+        }
+    }
+
     pub fn validate(&self) -> usize {
         let v: Vec<_> = self
             .springs
@@ -106,9 +119,15 @@ fn test_p1() {
     .read_data()
     .unwrap();
     let exp = vec![1usize, 4, 1, 1, 4, 10];
+    input[2].combinations(0);
     let v: Vec<_> = input.iter_mut().map(|s| s.combinations(0)).collect();
     assert_eq!(exp, v);
     assert_eq!(21, p1(&mut input));
+
+    let mut input: Vec<SpringRow> = Input::inline("?###??????????###???????? 3,2,1,3,2,1")
+        .read_data()
+        .unwrap();
+    println!("{}", input[0].combinations(0));
 }
 
 #[test]
@@ -132,5 +151,9 @@ fn test_p2() {
 
 #[test]
 fn final_test() {
-    let input = Input::file("./data/day12.txt").unwrap().lines();
+    let mut input = Input::file("./data/day12.txt")
+        .unwrap()
+        .read_data()
+        .unwrap();
+    assert_eq!(7732, p1(&mut input));
 }
