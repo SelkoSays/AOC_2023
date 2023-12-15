@@ -101,6 +101,15 @@ impl Input {
             .collect()
     }
 
+    pub fn read_seperated<T: FromStr>(self, sep: char) -> Result<Vec<T>, <T as FromStr>::Err> {
+        self.raw_string
+            .lines()
+            .map(|l| l.trim())
+            .filter(|line| !line.is_empty())
+            .flat_map(|l| l.split(sep).map(|x| x.parse()))
+            .collect()
+    }
+
     /// Read data to Vec of Types where Typed structs are space (new line separated)
     ///
     /// This function runs trim and skips empty lines at end of file
