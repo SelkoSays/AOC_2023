@@ -153,10 +153,15 @@ U 2 (#7a21e3)
 
 #[test]
 fn test_p2() {
-    todo!();
+    //todo!();
 }
 
 #[test]
 fn final_test() {
-    let input = Input::file("./data/day18.txt").unwrap().lines();
+    let input: Vec<Dig> = Input::file("./data/day18.txt")
+        .unwrap()
+        .read_data()
+        .unwrap();
+    assert_eq!(p1(&input), 40714);
+    assert_eq!(p2(&input), 129849166997110);
 }
