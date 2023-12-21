@@ -199,6 +199,29 @@ impl Input {
 
         Ok((h, v))
     }
+
+    pub fn read_n_split_once_on_empty_line<H: FromStr, T: FromStr>(
+        self,
+    ) -> Result<(Vec<H>, Vec<T>), <T as FromStr>::Err>
+    where
+        H: std::str::FromStr<Err = <T as std::str::FromStr>::Err>,
+    {
+        let mut empty_line_reached = false;
+        let mut v1 = Vec::new();
+        let mut v2 = Vec::new();
+
+        for l in self.raw_string.lines() {
+            if empty_line_reached {
+                v2.push(l.trim().parse()?);
+            } else if l.trim().is_empty() {
+                empty_line_reached = true;
+            } else {
+                v1.push(l.trim().parse()?);
+            }
+        }
+
+        Ok((v1, v2))
+    }
 }
 
 /*
