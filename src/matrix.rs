@@ -1,6 +1,26 @@
 #[derive(Debug, Clone)]
 pub struct Matrix<T>(pub Vec<Vec<T>>);
 
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct Point {
+    pub x: usize,
+    pub y: usize,
+}
+
+impl Point {
+    pub fn new(x: usize, y: usize) -> Self {
+        Self { x, y }
+    }
+}
+
+impl<T: PartialEq> PartialEq for Matrix<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.0 == other.0
+    }
+}
+
+impl<T: Eq> Eq for Matrix<T> {}
+
 impl<T> Matrix<T> {
     pub fn get(&self, x: usize, y: usize) -> Option<&T> {
         self.0.get(y).map(|v| v.get(x)).unwrap_or(None)
@@ -8,6 +28,14 @@ impl<T> Matrix<T> {
 
     pub fn get_mut(&mut self, x: usize, y: usize) -> Option<&mut T> {
         self.0.get_mut(y).map(|v| v.get_mut(x)).unwrap_or(None)
+    }
+
+    pub fn pget(&self, p: &Point) -> Option<&T> {
+        self.0.get(p.y).map(|v| v.get(p.x)).unwrap_or(None)
+    }
+
+    pub fn pget_mut(&mut self, p: &Point) -> Option<&mut T> {
+        self.0.get_mut(p.y).map(|v| v.get_mut(p.x)).unwrap_or(None)
     }
 
     pub fn lenx(&self) -> usize {
@@ -29,6 +57,17 @@ impl<T: PartialEq> Matrix<T> {
             for (x, e) in v.iter().enumerate() {
                 if e == el {
                     return Some((x, y));
+                }
+            }
+        }
+        None
+    }
+
+    pub fn find_first_p(&self, el: &T) -> Option<Point> {
+        for (y, v) in self.0.iter().enumerate() {
+            for (x, e) in v.iter().enumerate() {
+                if e == el {
+                    return Some(Point::new(x, y));
                 }
             }
         }
