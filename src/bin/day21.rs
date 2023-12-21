@@ -52,7 +52,7 @@ fn mark_plots(start: &Point, d: &mut Data, num_steps: usize) {
     }
 }
 
-fn mark_plots2(start: &Point, d: &mut Data, num_steps: usize) -> usize {
+fn mark_plots2(start: &Point, d: &mut Data, num_steps: usize) {
     let mut options: VecDeque<(Point, usize)> = VecDeque::from([(start.clone(), 0usize)]);
     let mut points = HashSet::new();
     points.insert((start.clone(), 0usize));
@@ -63,18 +63,31 @@ fn mark_plots2(start: &Point, d: &mut Data, num_steps: usize) -> usize {
         let opt = options.pop_front().unwrap();
         let opts = get_opts(&opt.0, d);
         for p in &opts {
-            if let Some(e) = d.0.pget_mut(p) {
-                *e = Tile::Checked;
-                points.insert((p.clone(), opt.1 + 1));
+            if let Some(pp) = d.0.pget_mut(p) {
+                *pp = Tile::Checked;
             }
+            points.insert((p.clone(), opt.1 + 1));
         }
         options.extend(opts.into_iter().map(|p| (p, opt.1 + 1)));
     }
-    let nss = points
-        .iter()
-        .filter(|(_, sn)| (*sn % num_steps) == 0)
-        .count();
-    nss
+    for (p, n) in &points {
+        if let Some(t) = d.0.pget_mut(p) {
+            *t = match t {
+                Tile::Number(nn) if n < nn => Tile::Number(*n),
+                Tile::Checked | Tile::Plot => Tile::Number(*n),
+                _ => continue,
+            }
+        }
+    }
+    println!("hs len: {}", points.len());
+    println!("{}", d.0);
+    let l = points
+        .into_iter()
+        .filter(|(_, d)| d % 2 == 0)
+        .map(|(p, _)| p)
+        .collect::<HashSet<Point>>()
+        .len();
+    println!("l: {l}");
 }
 
 fn mark_plots3(plot: &Point, cs: usize, d: &Data, num_steps: usize, points: &mut HashSet<Point>) {
@@ -131,6 +144,7 @@ enum Tile {
     Plot,
     Rock,
     Checked,
+    Number(usize),
 }
 
 impl std::fmt::Display for Tile {
@@ -139,6 +153,7 @@ impl std::fmt::Display for Tile {
             Tile::Plot => ".",
             Tile::Rock => "#",
             Tile::Checked => "O",
+            Self::Number(n) => return write!(f, "{n}"),
         };
         write!(f, "{s}")
     }
@@ -198,6 +213,31 @@ fn test_p1() {
     assert_eq!(p1(&input, 2), 4);
     assert_eq!(p1(&input, 3), 6);
     assert_eq!(p1(&input, 6), 16);
+}
+
+#[test]
+fn test_print_neki() {
+    let mut d: Data = Input::inline(
+        "\
+...........
+.....###.#.
+.###.##..#.
+..#.#...#..
+....#.#....
+.##..S####.
+.##..#...#.
+.......##..
+.##.#.####.
+.##..##.##.
+...........",
+    )
+    .read()
+    .unwrap();
+    let start = d.0.find_first_p(&Tile::Checked).unwrap();
+    if let Some(e) = d.0.pget_mut(&start) {
+        *e = Tile::Plot;
+    }
+    mark_plots2(&start, &mut d, 6);
 }
 
 #[test]
